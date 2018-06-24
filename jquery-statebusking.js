@@ -65,7 +65,7 @@
 
     // resolve element
     var el = resolveProp(view, 'el', opts)
-    if (!el) el = document.createElement(resolveProp(view, 'tagName', opts))
+    if (!el) el = document.createElement(resolveProp(view, 'tagName', opts) || 'div')
     if (el.jquery) el = el.get(0)
     var $el = view.$el = $(el).eq(0)
 
