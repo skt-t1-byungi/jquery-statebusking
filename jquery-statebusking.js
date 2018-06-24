@@ -18,7 +18,7 @@
   statebus.createModel = function (modelName, path, opts) {
     var scheme = models[modelName]
     var model = createdModels[path] = $.statebus(path, scheme)
-    if (model.action.init) model.init(opts)
+    if (scheme.init) scheme.init(model, opts)
 
     return model
   }
