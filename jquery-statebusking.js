@@ -17,9 +17,8 @@
 
   statebus.createModel = function (modelName, path, opts) {
     var scheme = models[modelName]
-    var model = createdModels[path] = $.statebus(path, scheme)
+    var model = createdModels[path] = $.statebus(path, scheme, opts.override)
     if (scheme.init) scheme.init(model, opts)
-
     return model
   }
 
@@ -31,14 +30,14 @@
       return createdModels[path]
     },
     $$unsubscribes: [],
-    listenTo: function (model, evtName, func) {
+    listenTo: function (model, evtName, func, immediately) {
       if (typeof model === 'string') {
         func = evtName
         evtName = model
         model = statebus
       }
 
-      var unsubscribe = model.on(evtName, $.proxy(func, this))
+      var unsubscribe = model.on(evtName, $.proxy(func, this), immediately)
       this.$$unsubscribes.push(unsubscribe)
 
       return this
@@ -70,9 +69,10 @@
 
     var view = new Func()
     view.uid = viewIncrement++
+    view.viewOptions = opts
 
     // resolve element
-    var el = resolveProp(view, 'el', opts)
+    var el = resolveProp(view, 'el', opts) || opts.el
     if (!el) el = document.createElement(resolveProp(view, 'tagName', opts) || 'div')
     if (el.jquery) el = el.get(0)
     var $el = view.$el = $(el).eq(0)
@@ -105,7 +105,7 @@
       return source[parentName]
     })
 
-    return $.extend.apply(null, [{}].concat(parents, definition))
+    return $.extend.apply(null, [true, {}].concat(parents, definition))
   }
 
   function resolveProp (view, prop, opts) {
