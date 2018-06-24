@@ -97,7 +97,7 @@
       return source[parentName]
     })
 
-    return $.extend.apply(null, parents.concat(definition))
+    return $.extend.apply(null, [{}].concat(parents, definition))
   }
 
   function resolveProp (view, prop, opts) {
