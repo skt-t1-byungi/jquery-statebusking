@@ -31,11 +31,17 @@
       return createdModels[path]
     },
     $$unsubscribes: [],
-    listenTo: function (modelPath, evtName, func) {
-      var model = this.getModel(modelPath)
+    listenTo: function (model, evtName, func) {
+      if (typeof model === 'string') {
+        func = evtName
+        evtName = model
+        model = statebus
+      }
+
       var unsubscribe = model.on(evtName, $.proxy(func, this))
       this.$$unsubscribes.push(unsubscribe)
-      return model
+
+      return this
     },
     remove: function () {
       this.$el.remove()
