@@ -10,14 +10,16 @@
 
   statebus.model = function (modelName, parents, definition) {
     models[modelName] = resolveExtends(models, parents, definition)
-    return function (path) {
-      return statebus.createModel(modelName, path)
+    return function (path, opts) {
+      return statebus.createModel(modelName, path, opts)
     }
   }
 
-  statebus.createModel = function (modelName, path) {
+  statebus.createModel = function (modelName, path, opts) {
     var scheme = models[modelName]
     var model = createdModels[path] = $.statebus(path, scheme)
+    if (model.action.init) model.init(opts)
+
     return model
   }
 
