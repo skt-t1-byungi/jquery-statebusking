@@ -18,35 +18,61 @@
   statebus.createModel = function (modelName, path, opts) {
     var scheme = models[modelName]
     var model = createdModels[path] = $.statebus(path, scheme, opts.override)
-    if (scheme.init) scheme.init(model, opts)
+    if (model.init) model.init(opts)
     return model
   }
 
   var viewBaseMethods = {
+    $$$boot: function () {
+      this.$$$subscriptions = []
+    },
     $: function (selector) {
       return this.$el.find(selector)
     },
-    getModel: function (path) {
-      return createdModels[path]
+    getModel: function (model) {
+      return typeof model === 'string' ? createdModels[model] : model
     },
-    $$unsubscribes: [],
-    listenTo: function (model, evtName, func, immediately) {
-      if (typeof model === 'string') {
-        func = evtName
-        evtName = model
-        model = statebus
+    getState: function (model, propPath) {
+      return objectGet(this.getModel(model).state, propPath)
+    },
+    dispatch: function () {
+      var args = $.makeArray(arguments)
+      var actName = args.shift()
+      var dispatched = []
+
+      $.each(this.$$$subscriptions, function (_, subscription) {
+        var model = subscription.model
+        if (dispatched.indexOf(model) !== -1) return
+        dispatched.push(model)
+
+        if (model.action[actName]) model.action[actName].apply(null, args)
+      })
+      return this
+    },
+    dispatchAll: function () {
+      var args = $.makeArray(arguments)
+      var actName = args.shift()
+
+      for (var path in createdModels) {
+        var model = createdModels[path]
+        if (model.action[actName]) model.action[actName].apply(null, args)
       }
-
-      var unsubscribe = model.on(evtName, $.proxy(func, this), immediately)
-      this.$$unsubscribes.push(unsubscribe)
-
+      return this
+    },
+    listenTo: function (model, evtName, func, immediately) {
+      model = this.getModel(model)
+      this.$$$subscriptions.push({
+        unsubscribe: model.on(evtName, $.proxy(func, this), immediately),
+        model: model
+      })
       return this
     },
     remove: function () {
       this.$el.remove()
-      $.each(this.$$unsubscribes, function (_, unsubscribe) {
-        unsubscribe()
+      $.each(this.$$$subscriptions, function (_, subscription) {
+        subscription.unsubscribe()
       })
+      this.$$$subscriptions = []
       return this
     }
   }
@@ -58,18 +84,13 @@
     }
   }
 
-  var viewIncrement = 0
-
   statebus.createView = function (viewName, opts) {
     opts = opts || {}
 
     // create view instance
     var Func = function () {}
     Func.prototype = views[viewName]
-
     var view = new Func()
-    view.uid = viewIncrement++
-    view.viewOptions = opts
 
     // resolve element
     var el = resolveProp(view, 'el', opts) || opts.el
@@ -90,6 +111,7 @@
       $el.on(match[1], match[2], $.proxy(handler, view))
     })
 
+    view.$$$boot()
     if (view.init) view.init(opts)
 
     return view
@@ -102,7 +124,7 @@
     }
 
     parents = $.map([].concat(parents), function (parentName) {
-      return source[parentName]
+      return typeof parentName === 'string' ? source[parentName] : parentName
     })
 
     return $.extend.apply(null, [true, {}].concat(parents, definition))
@@ -110,5 +132,14 @@
 
   function resolveProp (view, prop, opts) {
     return typeof view[prop] === 'function' ? view[prop](opts) : view[prop]
+  }
+
+  function objectGet (src, path, defaults) {
+    path = path.split('.')
+    while (path.length) {
+      src = src[path.shift()]
+      if (!src) return defaults
+    }
+    return src
   }
 }))
