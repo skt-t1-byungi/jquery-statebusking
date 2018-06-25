@@ -4,22 +4,22 @@
       : (factory(global.jQuery || global.$))
 }(window || this, function ($) {
   var statebus = $.statebus
-  var models = statebus.models = {}
+  var stores = statebus.stores = {}
   var views = statebus.views = {}
-  var createdModels = {}
+  var createdStores = {}
 
-  statebus.model = function (modelName, parents, definition) {
-    models[modelName] = resolveExtends(models, parents, definition)
+  statebus.store = function (storeName, parents, definition) {
+    stores[storeName] = resolveExtends(stores, parents, definition)
     return function (path, opts) {
-      return statebus.createModel(modelName, path, opts)
+      return statebus.createStore(storeName, path, opts)
     }
   }
 
-  statebus.createModel = function (modelName, path, opts) {
-    var scheme = models[modelName]
-    var model = createdModels[path] = $.statebus(path, scheme, opts.override)
-    if (model.init) model.init(opts)
-    return model
+  statebus.createStore = function (storeName, path, opts) {
+    var scheme = stores[storeName]
+    var store = createdStores[path] = $.statebus(path, scheme, opts.override)
+    if (store.init) store.init(opts)
+    return store
   }
 
   var viewBaseMethods = {
@@ -29,11 +29,11 @@
     $: function (selector) {
       return this.$el.find(selector)
     },
-    getModel: function (model) {
-      return typeof model === 'string' ? createdModels[model] : model
+    getStore: function (store) {
+      return typeof store === 'string' ? createdStores[store] : store
     },
-    getState: function (model, propPath) {
-      return objectGet(this.getModel(model).state, propPath)
+    getState: function (store, propPath) {
+      return objectGet(this.getStore(store).state, propPath)
     },
     dispatch: function () {
       var args = $.makeArray(arguments)
@@ -41,30 +41,35 @@
       var dispatched = []
 
       $.each(this.$$$subscriptions, function (_, subscription) {
-        var model = subscription.model
-        if (dispatched.indexOf(model) !== -1) return
-        dispatched.push(model)
+        var store = subscription.store
 
-        if (model.action[actName]) model.action[actName].apply(null, args)
+        if (dispatched.indexOf(store) !== -1) return
+        dispatched.push(store)
+
+        if (store.action[actName]) store.action[actName].apply(null, args)
       })
+
       return this
     },
     dispatchAll: function () {
       var args = $.makeArray(arguments)
       var actName = args.shift()
 
-      for (var path in createdModels) {
-        var model = createdModels[path]
-        if (model.action[actName]) model.action[actName].apply(null, args)
+      for (var path in createdStores) {
+        var store = createdStores[path]
+        if (store.action[actName]) store.action[actName].apply(null, args)
       }
+
       return this
     },
-    listenTo: function (model, evtName, func, immediately) {
-      model = this.getModel(model)
+    listenTo: function (store, evtName, func, immediately) {
+      store = this.getStore(store)
+
       this.$$$subscriptions.push({
-        unsubscribe: model.on(evtName, $.proxy(func, this), immediately),
-        model: model
+        unsubscribe: store.on(evtName, $.proxy(func, this), immediately),
+        store: store
       })
+
       return this
     },
     remove: function () {
