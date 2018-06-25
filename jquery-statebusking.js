@@ -9,16 +9,26 @@
   var createdStores = {}
 
   statebus.store = function (storeName, parents, definition) {
-    stores[storeName] = resolveExtends(stores, parents, definition)
-    return function (path, opts) {
-      return statebus.createStore(storeName, path, opts)
+    stores[storeName] = makeDefinition(stores, parents, definition)
+
+    var createFunc = function (namespace, opts) {
+      return statebus.createStore(storeName, namespace, opts)
     }
+    createFunc.$$$defName = storeName
+
+    return createFunc
   }
 
-  statebus.createStore = function (storeName, path, opts) {
-    var scheme = stores[storeName]
-    var store = createdStores[path] = $.statebus(path, scheme, opts.override)
+  statebus.createStore = function (storeName, namespace, opts) {
+    var def = resolveDefinition(storeName)
+
+    if (typeof def.state === 'function') {
+      def = $.extend({}, def, {state: def.state(opts)})
+    }
+
+    var store = createdStores[namespace] = statebus(namespace, def, opts.override)
     if (store.init) store.init(opts)
+
     return store
   }
 
@@ -83,19 +93,24 @@
   }
 
   statebus.view = function (viewName, parents, definition) {
-    views[viewName] = $.extend({}, viewBaseMethods, resolveExtends(views, parents, definition))
-    return function (opts) {
+    views[viewName] = $.extend({}, viewBaseMethods, makeDefinition(views, parents, definition))
+
+    var createView = function (opts) {
       return statebus.createView(viewName, opts)
     }
+    createView.$$$defName = viewName
+
+    return createView
   }
 
   statebus.createView = function (viewName, opts) {
     opts = opts || {}
 
+    var def = resolveDefinition(views, viewName)
+    if (typeof def.state === 'function') def.state = def.state(opts)
+
     // create view instance
-    var Func = function () {}
-    Func.prototype = views[viewName]
-    var view = new Func()
+    var view = statebus(newViewNamespace(), def, opts.override)
 
     // resolve element
     var el = resolveProp(view, 'el', opts) || opts.el
@@ -122,17 +137,28 @@
     return view
   }
 
-  function resolveExtends (source, parents, definition) {
+  function makeDefinition (source, parents, definition) {
     if (!definition) {
       definition = parents
       parents = []
     }
 
-    parents = $.map([].concat(parents), function (parentName) {
-      return typeof parentName === 'string' ? source[parentName] : parentName
+    parents = $.map([].concat(parents), function (name) {
+      return resolveDefinition(source, name)
     })
 
     return $.extend.apply(null, [true, {}].concat(parents, definition))
+  }
+
+  function resolveDefinition (source, name) {
+    return typeof name === 'string' ? source[name]
+      : (name && name.$$$defName) ? source[name.$$$defName]
+        : name
+  }
+
+  var _viewUid = 0
+  function newViewNamespace (name) {
+    return '__view__/' + name + '/' + (_viewUid++)
   }
 
   function resolveProp (view, prop, opts) {
