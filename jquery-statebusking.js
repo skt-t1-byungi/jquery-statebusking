@@ -16,12 +16,10 @@
   }
 
   statebus.createStore = function (name, ns, opts) {
+    opts = opts || {}
     var store = createdStores[ns] = statebus(ns, resolveDef(stores, name), opts.override)
 
-    if (typeof store.state === 'function') store.state = store.state(opts)
-    if (store.init) store.init(opts)
-
-    return store
+    return initBus(store, opts)
   }
 
   var viewBaseMethods = {
@@ -89,6 +87,8 @@
 
   statebus.createView = function (name, opts) {
     opts = opts || {}
+
+    // create instance
     var view = statebus(makeViewNS(name), resolveDef(views, name), opts.override)
 
     // resolve element
@@ -115,11 +115,13 @@
     // for "listenTo"
     view.$$$subscriptions = []
 
-    // init
-    if (typeof view.state === 'function') view.state = view.state(opts)
-    if (view.init) view.init(opts)
+    return initBus(view, opts)
+  }
 
-    return view
+  function initBus (bus, opts) {
+    bus.state = typeof bus.state === 'function' ? bus.state(opts) : $.extend(true, {}, bus.state)
+    if (bus.init) bus.init(opts)
+    return bus
   }
 
   function makeDef (source, parents, def) {
