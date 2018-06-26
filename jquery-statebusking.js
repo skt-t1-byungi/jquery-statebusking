@@ -11,14 +11,12 @@
   statebus.store = function (name, parents, definition) {
     stores[name] = makeDef(stores, parents, definition)
     var func = function (ns, opts) { return statebus.createStore(name, ns, opts) }
-
     return makeCtor(func, name)
   }
 
   statebus.createStore = function (name, ns, opts) {
     opts = opts || {}
     var store = createdStores[ns] = statebus(ns, resolveDef(stores, name), opts.override)
-
     return initBus(store, opts)
   }
 
