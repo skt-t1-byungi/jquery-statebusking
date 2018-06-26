@@ -1,7 +1,9 @@
 {
   "name": "jquery-statetbusking",
-  "version": "1.0.0",
-  "main": "index.js",
+  "description": "Backbone alternative using jquery-statebus",
+  "version": "0.0.1",
+  "main": "jquery-statebusking.js",
+  "unpkg": "jquery-statebusking.min.js",
   "license": "MIT",
   "scripts": {
     "build": "uglifyjs jquery-statebusking.js -c -m --ie8 -o jquery-statebusking.min.js"

@@ -66,9 +66,16 @@
       store = this.getStore(store)
 
       var unsubscribe = store.on(evtName, $.proxy(func, this), immediately)
-      this.$$$subscriptions.push({unsubscribe: unsubscribe, store: store})
+      var subscription = {unsubscribe: unsubscribe, store: store}
+      this.$$$subscriptions.push(subscription)
 
-      return unsubscribe
+      var self = this
+      return function () {
+        var subscriptions = self.$$$subscriptions
+
+        subscriptions.splice(subscriptions.indexOf(subscription), 1)
+        unsubscribe()
+      }
     },
 
     remove: function () {
@@ -78,6 +85,9 @@
         subscription.unsubscribe()
       })
 
+      // clear subscriptions
+      this.$$$subscriptions = []
+
       return this
     }
   }
@@ -85,7 +95,6 @@
   statebus.view = function (name, parents, definition) {
     views[name] = $.extend({}, viewBaseMethods, makeDef(views, parents, definition))
     var func = function (opts) { return statebus.createView(name, opts) }
-
     return makeCtor(func, name)
   }
 
