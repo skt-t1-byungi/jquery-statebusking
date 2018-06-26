@@ -18,7 +18,7 @@
     opts = opts || {}
 
     if (createdStores.indexOf(ns) === -1) createdStores.push(ns)
-    var store = statebus(ns, resolveDef(stores, name), opts.override)
+    var store = statebus(ns, resolveDef(stores, name), true)
 
     return initBus(store, opts)
   }
@@ -102,7 +102,7 @@
     opts = opts || {}
 
     // create instance
-    var view = statebus(makeViewNS(name), resolveDef(views, name), opts.override)
+    var view = statebus(makeViewNS(name), resolveDef(views, name), true)
 
     // resolve element
     var el = resolveProp(view, 'el', opts)
@@ -151,9 +151,12 @@
   }
 
   function resolveDef (source, name) {
-    return typeof name === 'string' ? source[name]
+    var def = typeof name === 'string' ? source[name]
       : (name && name.$$$defName) ? source[name.$$$defName]
         : name
+    if (def) return def
+
+    throw new TypeError('[statebusking] Unknown definition"(' + name.toString() + ')."')
   }
 
   function makeCtor (func, name) {
@@ -173,7 +176,9 @@
 
   function objectGet (src, path, defaults) {
     path = path.split('.')
-    while (path.length) if (!(src = src[path.shift()])) return defaults
+    while (path.length) {
+      if ((src = src[path.shift()]) === undefined) return defaults
+    }
     return src
   }
 }))

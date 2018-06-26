@@ -2,11 +2,26 @@
   "name": "jquery-statetbusking",
   "description": "Backbone alternative using jquery-statebus",
   "version": "0.0.1",
+  "license": "MIT",
+  "author": {
+    "name": "skt-t1-byungi",
+    "email": "tiniwz@gmail.com"
+  },
   "main": "jquery-statebusking.js",
   "unpkg": "jquery-statebusking.min.js",
-  "license": "MIT",
+  "files": [
+    "jquery-statebusking.js",
+    "jquery-statebusking.min.js"
+  ],
   "scripts": {
-    "build": "uglifyjs jquery-statebusking.js -c -m --ie8 -o jquery-statebusking.min.js"
+    "build": "uglifyjs jquery-statebusking.js -c -m --ie8 -o jquery-statebusking.min.js",
+    "prepublishOnly": "npm run test && npm run build",
+    "prepush": "npm run test && npm run build",
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skt-t1-byungi/jquery-statebusking.git"
   },
   "eslintConfig": {
     "extends": "byungi/old",
@@ -22,8 +37,17 @@
     "test.js"
   ],
   "devDependencies": {
+    "ava": "^0.25.0",
+    "browser-env": "^3.2.5",
     "eslint": "^4.19.1",
     "eslint-config-byungi": "^0.0.16",
+    "jquery": "^3.3.1",
+    "jquery-statebus": "^0.3.0",
     "uglify-js": "^3.4.2"
+  },
+  "ava": {
+    "require": [
+      "./test/helpers/env.js"
+    ]
   }
 }
