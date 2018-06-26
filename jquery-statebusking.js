@@ -24,12 +24,15 @@
     $: function (selector) {
       return this.$el.find(selector)
     },
+
     getStore: function (store) {
       return typeof store === 'string' ? createdStores[store] : store
     },
+
     getState: function (store, propPath) {
       return objectGet(this.getStore(store).state, propPath)
     },
+
     dispatch: function () {
       var args = $.makeArray(arguments)
       var actName = args.shift()
@@ -46,6 +49,7 @@
 
       return this
     },
+
     dispatchAll: function () {
       var args = $.makeArray(arguments)
       var actName = args.shift()
@@ -57,6 +61,7 @@
 
       return this
     },
+
     listenTo: function (store, evtName, func, immediately) {
       store = this.getStore(store)
 
@@ -65,6 +70,7 @@
 
       return unsubscribe
     },
+
     remove: function () {
       this.$el.remove()
 
@@ -117,7 +123,7 @@
   }
 
   function initBus (bus, opts) {
-    bus.state = typeof bus.state === 'function' ? bus.state(opts) : bus.state
+    if (typeof bus.state === 'function') bus.state = bus.state(opts)
     if (bus.init) bus.init(opts)
     return bus
   }
