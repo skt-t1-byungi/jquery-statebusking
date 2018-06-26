@@ -9,33 +9,31 @@
   var createdStores = {}
 
   statebus.store = function (name, parents, definition) {
-    var def = stores[name] = makeDef(stores, parents, definition)
-    return makeCtor(function (ns, opts) { return statebus.createStore(name, ns, opts) }, def)
+    stores[name] = makeDef(stores, parents, definition)
+    var func = function (ns, opts) { return statebus.createStore(name, ns, opts) }
+
+    return makeCtor(func, name)
   }
 
   statebus.createStore = function (name, ns, opts) {
-    var store = createdStores[ns] = statebus(ns, resolveDef(name), opts.override)
+    var store = createdStores[ns] = statebus(ns, resolveDef(stores, name), opts.override)
+
+    if (typeof store.state === 'function') store.state = store.state(opts)
     if (store.init) store.init(opts)
+
     return store
   }
 
   var viewBaseMethods = {
-    $$$boot: function () {
-      this.$$$subscriptions = []
-    },
-
     $: function (selector) {
       return this.$el.find(selector)
     },
-
     getStore: function (store) {
       return typeof store === 'string' ? createdStores[store] : store
     },
-
     getState: function (store, propPath) {
       return objectGet(this.getStore(store).state, propPath)
     },
-
     dispatch: function () {
       var args = $.makeArray(arguments)
       var actName = args.shift()
@@ -52,7 +50,6 @@
 
       return this
     },
-
     dispatchAll: function () {
       var args = $.makeArray(arguments)
       var actName = args.shift()
@@ -64,7 +61,6 @@
 
       return this
     },
-
     listenTo: function (store, evtName, func, immediately) {
       store = this.getStore(store)
 
@@ -73,7 +69,6 @@
 
       return unsubscribe
     },
-
     remove: function () {
       this.$el.remove()
 
@@ -81,14 +76,15 @@
         subscription.unsubscribe()
       })
 
-      this.$$$subscriptions = []
       return this
     }
   }
 
   statebus.view = function (name, parents, definition) {
-    var def = views[name] = $.extend({}, viewBaseMethods, makeDef(views, parents, definition))
-    return makeCtor(function (opts) { return statebus.createView(name, opts) }, def)
+    views[name] = $.extend({}, viewBaseMethods, makeDef(views, parents, definition))
+    var func = function (opts) { return statebus.createView(name, opts) }
+
+    return makeCtor(func, name)
   }
 
   statebus.createView = function (name, opts) {
@@ -114,7 +110,11 @@
       $el.on(match[1], match[2], $.proxy(handler, view))
     })
 
-    view.$$$boot()
+    // for "listenTo"
+    view.$$$subscriptions = []
+
+    // init
+    if (typeof view.state === 'function') view.state = view.state(opts)
     if (view.init) view.init(opts)
 
     return view
@@ -139,8 +139,8 @@
         : name
   }
 
-  function makeCtor (func, def) {
-    return $.extend(func, {$$$def: def})
+  function makeCtor (func, name) {
+    return $.extend(func, {$$$def: name})
   }
 
   var _viewUid = 0
