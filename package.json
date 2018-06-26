@@ -14,6 +14,11 @@
       "module": true
     }
   },
+  "eslintIgnore": [
+    "jquery-statebusking.min.js",
+    "browser-env.js",
+    "test.js"
+  ],
   "devDependencies": {
     "eslint": "^4.19.1",
     "eslint-config-byungi": "^0.0.16",
