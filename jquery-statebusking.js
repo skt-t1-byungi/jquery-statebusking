@@ -6,7 +6,7 @@
   var statebus = $.statebus
   var stores = statebus.stores = {}
   var views = statebus.views = {}
-  var createdStores = {}
+  var createdStores = []
 
   statebus.store = function (name, parents, definition) {
     stores[name] = makeDef(stores, parents, definition)
@@ -16,7 +16,10 @@
 
   statebus.createStore = function (name, ns, opts) {
     opts = opts || {}
-    var store = createdStores[ns] = statebus(ns, resolveDef(stores, name), opts.override)
+
+    if (createdStores.indexOf(ns) === -1) createdStores.push(ns)
+    var store = statebus(ns, resolveDef(stores, name), opts.override)
+
     return initBus(store, opts)
   }
 
@@ -25,12 +28,8 @@
       return this.$el.find(selector)
     },
 
-    getStore: function (store) {
-      return typeof store === 'string' ? createdStores[store] : store
-    },
-
-    getState: function (store, propPath) {
-      return objectGet(this.getStore(store).state, propPath)
+    getState: function (ns, propPath, defaults) {
+      return objectGet(statebus.state[ns], propPath, defaults)
     },
 
     dispatch: function () {
@@ -54,10 +53,10 @@
       var args = $.makeArray(arguments)
       var actName = args.shift()
 
-      for (var path in createdStores) {
-        var store = createdStores[path]
-        if (store.action[actName]) store.action[actName].apply(null, args)
-      }
+      $.each(createdStores, function (_, ns) {
+        var actions = statebus.action[ns]
+        if (actions && actions[actName]) actions[actName].apply(null, args)
+      })
 
       return this
     },
@@ -69,6 +68,7 @@
       var subscription = {unsubscribe: unsubscribe, store: store}
       this.$$$subscriptions.push(subscription)
 
+      // returns unsubscribe function
       var self = this
       return function () {
         var subscriptions = self.$$$subscriptions
@@ -173,11 +173,7 @@
 
   function objectGet (src, path, defaults) {
     path = path.split('.')
-
-    while (path.length) {
-      if (!(src = src[path.shift()])) return defaults
-    }
-
+    while (path.length) if (!(src = src[path.shift()])) return defaults
     return src
   }
 }))
