@@ -103,12 +103,14 @@
 
     // resolve events
     var events = resolveProp(view, 'events', opts)
-    var splitter = /^(\S+)\s*(.*)$/
-    $.each(events, function (key, handler) {
-      if (typeof handler !== 'function') handler = view[handler]
-      var match = key.match(splitter)
-      $el.on(match[1], match[2], $.proxy(handler, view))
-    })
+    if (events) {
+      var splitter = /^(\S+)\s*(.*)$/
+      $.each(events, function (key, handler) {
+        if (typeof handler === 'string') handler = view[handler]
+        var match = key.match(splitter)
+        $el.on(match[1], match[2], $.proxy(handler, view))
+      })
+    }
 
     // for "listenTo"
     view.$$$subscriptions = []

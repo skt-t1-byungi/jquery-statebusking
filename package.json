@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "build": "uglifyjs jquery-statebusking.js -c -m --ie8 -o jquery-statebusking.min.js"
+  },
   "eslintConfig": {
     "extends": "byungi/old",
     "globals": {
@@ -13,6 +16,7 @@
   },
   "devDependencies": {
     "eslint": "^4.19.1",
-    "eslint-config-byungi": "^0.0.16"
+    "eslint-config-byungi": "^0.0.16",
+    "uglify-js": "^3.4.2"
   }
 }
