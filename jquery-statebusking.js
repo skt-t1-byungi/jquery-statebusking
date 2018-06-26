@@ -117,7 +117,7 @@
   }
 
   function initBus (bus, opts) {
-    bus.state = typeof bus.state === 'function' ? bus.state(opts) : $.extend(true, {}, bus.state)
+    bus.state = typeof bus.state === 'function' ? bus.state(opts) : bus.state
     if (bus.init) bus.init(opts)
     return bus
   }
