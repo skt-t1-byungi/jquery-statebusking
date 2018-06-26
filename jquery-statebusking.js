@@ -10,10 +10,7 @@
 
   statebus.store = function (name, parents, definition) {
     var def = stores[name] = makeDef(stores, parents, definition)
-
-    return makeCtor(function (ns, opts) {
-      return statebus.createStore(name, ns, opts)
-    }, def)
+    return makeCtor(function (ns, opts) { return statebus.createStore(name, ns, opts) }, def)
   }
 
   statebus.createStore = function (name, ns, opts) {
@@ -91,10 +88,7 @@
 
   statebus.view = function (name, parents, definition) {
     var def = views[name] = $.extend({}, viewBaseMethods, makeDef(views, parents, definition))
-
-    return makeCtor(function (opts) {
-      return statebus.createView(name, opts)
-    }, def)
+    return makeCtor(function (opts) { return statebus.createView(name, opts) }, def)
   }
 
   statebus.createView = function (name, opts) {
