@@ -8,27 +8,17 @@
   var views = statebus.views = {}
   var createdStores = {}
 
-  statebus.store = function (storeName, parents, definition) {
-    stores[storeName] = makeDefinition(stores, parents, definition)
+  statebus.store = function (name, parents, definition) {
+    var def = stores[name] = makeDef(stores, parents, definition)
 
-    var createFunc = function (namespace, opts) {
-      return statebus.createStore(storeName, namespace, opts)
-    }
-    createFunc.$$$defName = storeName
-
-    return createFunc
+    return makeCtor(function (ns, opts) {
+      return statebus.createStore(name, ns, opts)
+    }, def)
   }
 
-  statebus.createStore = function (storeName, namespace, opts) {
-    var def = resolveDefinition(storeName)
-
-    if (typeof def.state === 'function') {
-      def = $.extend({}, def, {state: def.state(opts)})
-    }
-
-    var store = createdStores[namespace] = statebus(namespace, def, opts.override)
+  statebus.createStore = function (name, ns, opts) {
+    var store = createdStores[ns] = statebus(ns, resolveDef(name), opts.override)
     if (store.init) store.init(opts)
-
     return store
   }
 
@@ -36,15 +26,19 @@
     $$$boot: function () {
       this.$$$subscriptions = []
     },
+
     $: function (selector) {
       return this.$el.find(selector)
     },
+
     getStore: function (store) {
       return typeof store === 'string' ? createdStores[store] : store
     },
+
     getState: function (store, propPath) {
       return objectGet(this.getStore(store).state, propPath)
     },
+
     dispatch: function () {
       var args = $.makeArray(arguments)
       var actName = args.shift()
@@ -61,6 +55,7 @@
 
       return this
     },
+
     dispatchAll: function () {
       var args = $.makeArray(arguments)
       var actName = args.shift()
@@ -72,48 +67,42 @@
 
       return this
     },
+
     listenTo: function (store, evtName, func, immediately) {
       store = this.getStore(store)
 
-      this.$$$subscriptions.push({
-        unsubscribe: store.on(evtName, $.proxy(func, this), immediately),
-        store: store
-      })
+      var unsubscribe = store.on(evtName, $.proxy(func, this), immediately)
+      this.$$$subscriptions.push({unsubscribe: unsubscribe, store: store})
 
-      return this
+      return unsubscribe
     },
+
     remove: function () {
       this.$el.remove()
+
       $.each(this.$$$subscriptions, function (_, subscription) {
         subscription.unsubscribe()
       })
+
       this.$$$subscriptions = []
       return this
     }
   }
 
-  statebus.view = function (viewName, parents, definition) {
-    views[viewName] = $.extend({}, viewBaseMethods, makeDefinition(views, parents, definition))
+  statebus.view = function (name, parents, definition) {
+    var def = views[name] = $.extend({}, viewBaseMethods, makeDef(views, parents, definition))
 
-    var createView = function (opts) {
-      return statebus.createView(viewName, opts)
-    }
-    createView.$$$defName = viewName
-
-    return createView
+    return makeCtor(function (opts) {
+      return statebus.createView(name, opts)
+    }, def)
   }
 
-  statebus.createView = function (viewName, opts) {
+  statebus.createView = function (name, opts) {
     opts = opts || {}
-
-    var def = resolveDefinition(views, viewName)
-    if (typeof def.state === 'function') def.state = def.state(opts)
-
-    // create view instance
-    var view = statebus(newViewNamespace(), def, opts.override)
+    var view = statebus(makeViewNS(name), resolveDef(views, name), opts.override)
 
     // resolve element
-    var el = resolveProp(view, 'el', opts) || opts.el
+    var el = resolveProp(view, 'el', opts)
     if (!el) el = document.createElement(resolveProp(view, 'tagName', opts) || 'div')
     if (el.jquery) el = el.get(0)
     var $el = view.$el = $(el).eq(0)
@@ -137,40 +126,47 @@
     return view
   }
 
-  function makeDefinition (source, parents, definition) {
-    if (!definition) {
-      definition = parents
+  function makeDef (source, parents, def) {
+    if (!def) {
+      def = parents
       parents = []
     }
 
     parents = $.map([].concat(parents), function (name) {
-      return resolveDefinition(source, name)
+      return resolveDef(source, name)
     })
 
-    return $.extend.apply(null, [true, {}].concat(parents, definition))
+    return $.extend.apply(null, [true, {}].concat(parents, def))
   }
 
-  function resolveDefinition (source, name) {
+  function resolveDef (source, name) {
     return typeof name === 'string' ? source[name]
       : (name && name.$$$defName) ? source[name.$$$defName]
         : name
   }
 
+  function makeCtor (func, def) {
+    return $.extend(func, {$$$def: def})
+  }
+
   var _viewUid = 0
-  function newViewNamespace (name) {
-    return '__view__/' + name + '/' + (_viewUid++)
+  function makeViewNS (name) {
+    return '__views__/' + name + '@' + (_viewUid++)
   }
 
   function resolveProp (view, prop, opts) {
-    return typeof view[prop] === 'function' ? view[prop](opts) : view[prop]
+    return typeof view[prop] === 'function' ? view[prop](opts)
+      : opts.hasOwnProperty(prop) ? opts[prop]
+        : view[prop]
   }
 
   function objectGet (src, path, defaults) {
     path = path.split('.')
+
     while (path.length) {
-      src = src[path.shift()]
-      if (!src) return defaults
+      if (!(src = src[path.shift()])) return defaults
     }
+
     return src
   }
 }))
