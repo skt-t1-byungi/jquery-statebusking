@@ -155,7 +155,7 @@
         : name
     if (def) return def
 
-    throw new TypeError('[statebusking] Unknown definition"(' + name.toString() + ')."')
+    throw new TypeError('[statebusking] Unknown definition"(' + name + ')."')
   }
 
   function makeCtor (func, name) {
