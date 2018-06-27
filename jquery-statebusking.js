@@ -37,7 +37,7 @@
       var actName = args.shift()
       var dispatched = []
 
-      $.each(this.$$$subscriptions, function (_, subscription) {
+      $.each(this.$$$subs, function (_, subscription) {
         var store = subscription.store
 
         if (dispatched.indexOf(store) !== -1) return
@@ -65,14 +65,13 @@
       store = this.getStore(store)
 
       var unsubscribe = store.on(evtName, $.proxy(func, this), immediately)
-      var subscription = {unsubscribe: unsubscribe, store: store}
-      this.$$$subscriptions.push(subscription)
+      var subscription = {off: unsubscribe, store: store}
+      this.$$$subs.push(subscription)
 
       // returns unsubscribe function
       var self = this
       return function () {
-        var subscriptions = self.$$$subscriptions
-
+        var subscriptions = self.$$$subs
         subscriptions.splice(subscriptions.indexOf(subscription), 1)
         unsubscribe()
       }
@@ -81,12 +80,12 @@
     remove: function () {
       this.$el.remove()
 
-      $.each(this.$$$subscriptions, function (_, subscription) {
-        subscription.unsubscribe()
+      $.each(this.$$$subs, function (_, subscription) {
+        subscription.off()
       })
 
       // clear subscriptions
-      this.$$$subscriptions = []
+      this.$$$subs = []
 
       return this
     }
@@ -126,7 +125,7 @@
     }
 
     // for "listenTo"
-    view.$$$subscriptions = []
+    view.$$$subs = []
 
     return initBus(view, opts)
   }
@@ -152,7 +151,7 @@
 
   function resolveDef (source, name) {
     var def = typeof name === 'string' ? source[name]
-      : (name && name.$$$defName) ? source[name.$$$defName]
+      : (name && name.$$$name) ? source[name.$$$name]
         : name
     if (def) return def
 
@@ -160,7 +159,7 @@
   }
 
   function makeCtor (func, name) {
-    return $.extend(func, {$$$def: name})
+    return $.extend(func, {$$$name: name})
   }
 
   var _viewUid = 0

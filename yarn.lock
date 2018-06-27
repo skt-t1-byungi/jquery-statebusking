@@ -2173,9 +2173,9 @@ isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
 
-jquery-statebus@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/jquery-statebus/-/jquery-statebus-0.3.0.tgz#3d06ce659484d67df460d277b0e01fd037b46072"
+jquery-statebus@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/jquery-statebus/-/jquery-statebus-0.4.0.tgz#ac5a922ee1ffa51e5c9619ad600bb88ef1b6848a"
 
 jquery@^3.3.1:
   version "3.3.1"
