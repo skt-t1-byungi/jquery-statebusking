@@ -79,6 +79,7 @@
 
     remove: function () {
       this.$el.remove()
+      statebus.remove(this.$$ns)
 
       $.each(this.$$$subs, function (_, subscription) {
         subscription.off()
@@ -101,7 +102,8 @@
     opts = opts || {}
 
     // create instance
-    var view = statebus(makeViewNS(name), resolveDef(views, name), true)
+    var namespace = makeViewNS(name)
+    var view = statebus(namespace, resolveDef(views, name), true)
 
     // resolve element
     var el = resolveProp(view, 'el', opts)
@@ -124,8 +126,8 @@
       })
     }
 
-    // for "listenTo"
-    view.$$$subs = []
+    view.$$$subs = [] // for listenTo()
+    view.$$$ns = namespace // for remove()
 
     return initBus(view, opts)
   }
@@ -155,7 +157,7 @@
         : name
     if (def) return def
 
-    throw new TypeError('[statebusking] Unknown definition"(' + name + ')."')
+    throw new TypeError('[statebusking] Unknown definition. ("' + name + '")')
   }
 
   function makeCtor (func, name) {
