@@ -79,7 +79,7 @@
 
     remove: function () {
       this.$el.remove()
-      statebus.remove(this.$$ns)
+      statebus.remove(this.$$$ns)
 
       $.each(this.$$$subs, function (_, subscription) {
         subscription.off()
