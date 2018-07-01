@@ -10,3 +10,19 @@ $$.store('counter', {
     }
   }
 })
+
+$$.store('todos', {
+  state: {
+    todos: []
+  },
+  action: {
+    add (todo) {
+      const todos = [...this.state.todos, todo]
+      return {todos}
+    },
+    remove (todo) {
+      const todos = this.state.todos.filter(v => v !== todo)
+      return {todos}
+    }
+  }
+})

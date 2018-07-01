@@ -29,7 +29,11 @@
     },
 
     getState: function (ns, propPath, defaults) {
-      return objectGet(statebus.state[ns], propPath, defaults)
+      return objectGet(resolveStoreProp(ns, 'state'), propPath, defaults)
+    },
+
+    getPrevState: function (ns, propPath, defaults) {
+      return objectGet(resolveStoreProp(ns, 'prevState'), propPath, defaults)
     },
 
     dispatch: function () {
@@ -62,7 +66,10 @@
     },
 
     listenTo: function (store, evtName, func, immediately) {
-      store = this.getStore(store)
+      if (typeof store === 'string') {
+        evtName = store + '.' + evtName
+        store = statebus
+      }
 
       var unsubscribe = store.on(evtName, $.proxy(func, this), immediately)
       var subscription = {off: unsubscribe, store: store}
@@ -173,6 +180,10 @@
     return typeof view[prop] === 'function' ? view[prop](opts)
       : opts.hasOwnProperty(prop) ? opts[prop]
         : view[prop]
+  }
+
+  function resolveStoreProp (store, prop) {
+    return typeof store === 'string' ? statebus[prop][store] : store[prop]
   }
 
   function objectGet (src, path, defaults) {
