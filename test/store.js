@@ -5,7 +5,7 @@ test.before(t => require('./helpers/stores'))
 
 test('if unknown name, throws error', t => {
   const err = t.throws(t => $$.createStore('??', 'test'))
-  console.log('error : ' + err)
+  t.log('error : ' + err)
 })
 
 test('basic usage', t => {

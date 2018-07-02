@@ -49,6 +49,7 @@ test('set attributes by attrs prop', t => {
   t.true(view.$el.hasClass('test'))
 })
 
+// with init, listenTo, getState, getPrevState
 test('listen to store(string type) for render', t => {
   const todos = $$.createStore('todos', 'app/todos')
   const view = $$.createView('todos', { todos: 'app/todos' })
@@ -71,5 +72,46 @@ test('listen to store(ref type)', t => {
 })
 
 test('dispatch to store', t => {
+  actionStore('store1', { test () { t.pass() } })
+  actionStore('store2', { test () { t.fail() } })
 
+  initView('listenView', function () {
+    this.listenTo('app/store1', 'all', _ => {})
+    // dummies
+    this.listenTo('app/store1', 'all', _ => {})
+    this.listenTo('app/store1', 'test', _ => {})
+  })
+
+  $$.createStore('store1', 'app/store1')
+  $$.createStore('store2', 'app/store2')
+
+  const view = $$.createView('listenView')
+
+  t.plan(1)
+  view.dispatch('test')
+})
+
+const actionStore = (name, action) => $$.store(name, {action})
+const initView = (name, init) => $$.view(name, {init})
+
+test('dispatchAll to store', t => {
+  actionStore('store1', { test () { t.pass() } })
+  actionStore('store2', { test () { t.pass() } })
+
+  $$.view('listenView')
+
+  $$.createStore('store1', 'app/store1')
+  $$.createStore('store2', 'app/store2')
+
+  const view = $$.createView('listenView')
+
+  t.plan(2)
+  view.dispatchAll('test')
+})
+
+test('remove view', t => {
+  // removes element
+  // removes bus
+  // unsubscribe
+  t.pass()
 })

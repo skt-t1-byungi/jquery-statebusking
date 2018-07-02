@@ -42,12 +42,12 @@
       var dispatched = []
 
       $.each(this.$$$subs, function (_, subscription) {
-        var store = subscription.store
+        var action = subscription.action
 
-        if (dispatched.indexOf(store) !== -1) return
-        dispatched.push(store)
+        if (dispatched.indexOf(action) !== -1) return
+        dispatched.push(action)
 
-        if (store.action[actName]) store.action[actName].apply(null, args)
+        if (action[actName]) action[actName].apply(null, args)
       })
 
       return this
@@ -66,13 +66,19 @@
     },
 
     listenTo: function (store, evtName, func, immediately) {
+      // normalize
+      var action, on
       if (typeof store === 'string') {
         evtName = store + '.' + evtName
-        store = statebus
+        action = statebus.action[store]
+        on = statebus.on
+      } else {
+        action = store.action
+        on = store.on
       }
 
-      var unsubscribe = store.on(evtName, $.proxy(func, this), immediately)
-      var subscription = {off: unsubscribe, store: store}
+      var unsubscribe = on(evtName, $.proxy(func, this), immediately)
+      var subscription = {off: unsubscribe, action: action}
       this.$$$subs.push(subscription)
 
       // returns unsubscribe function
