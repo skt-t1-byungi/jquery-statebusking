@@ -1,5 +1,6 @@
 const test = require('ava')
-const $$ = require('jquery').statebus
+const $ = require('jquery')
+const $$ = $.statebus
 
 const doc = document
 const body = doc.body
@@ -110,8 +111,37 @@ test('dispatchAll to store', t => {
 })
 
 test('remove view', t => {
-  // removes element
-  // removes bus
-  // unsubscribe
-  t.pass()
+  body.innerHTML = `<div id="app"></div>`
+
+  $$.store('store', { action: { call: $.noop } })
+  const store = $$.createStore('store', 'app/store')
+
+  let hits = 0
+  $$.view('view', {
+    action: { call: $.noop },
+    init () {
+      this.listenTo(store, 'all', () => hits++)
+      this.on('all', () => hits++)
+    }
+  })
+  const view = $$.createView('view', {el: '#app'})
+
+  // before remove
+  store.action.call()
+  t.is(hits, 1)
+  view.action.call()
+  t.is(hits, 2)
+  t.is($('#app').length, 1)
+  t.true($$.state.hasOwnProperty(view.$$$ns))
+
+  // do remove
+  view.remove()
+
+  // after remove
+  store.action.call()
+  t.is(hits, 2)
+  view.action.call()
+  t.is(hits, 2)
+  t.is($('#app').length, 0)
+  t.false($$.state.hasOwnProperty(view.$$$ns))
 })
