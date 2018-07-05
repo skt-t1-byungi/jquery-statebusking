@@ -18,7 +18,7 @@ jquery-statebusking은 underscore에 대한 의존성이 없습니다. (저는 l
 ### Store
 ```js
 // 스토어를 정의합니다.
-$.statebus.store('Counter', {
+var Counter = $.statebus.store('Counter', {
   state: {
     value: 1
   },
@@ -36,51 +36,52 @@ $.statebus.store('Counter', {
 })
 
 // 정의한 스토어를 생성합니다.
-counterStore = $.statebus.createStore('Counter', 'app/counter')
+var counter = new Counter('app/counter')
 
 // 스토어에서 트리거되는 액션 이벤트를 청취합니다.
-counterStore.on('increment', function (){ ... })
-counterStore.on('decrement', function (){ ... })
-counterStore.on('all', function (){ ... }) // 모든 액션 이벤트를 청취합니다.
+counter.on('increment', function (){ ... })
+counter.on('decrement', function (){ ... })
+counter.on('all', function (){ ... }) // 모든 액션 이벤트를 청취합니다.
 
 // 다른 메소드를 호출 할 수도 있습니다.
-counterStore.log() // current: 1
+counter.log() // current: 1
 ```
-statebusking의 스토어(store)는 정적입니다. 백본의 모델처럼 동적으로 스토어를 생성, 제거를 할 수도 있지만 추천하지 않습니다. 스토어 대신, state의 값을 추가하거나 제거하세요.
+statebusking의 스토어(store)는 정적입니다. 백본의 모델처럼 동적으로 스토어를 생성, 제거를 할 수도 있지만 추천하지 않습니다. 스토어 대신 state에 값을 동적으로 추가하거나 제거하세요.
 
 #### Mixin
 ```js
-$.statebus.store('HasHistory', {
+var HasHistory = $.statebus.store('HasHistory', {
   state: {
     history: {}
   },
   action: {
-    add: function(item) {
+    pushHistory: function(item) {
       return {history: [].concat(this.state.history, item)}
     },
   }
 })
 
 // "HasHistory"를 mixin 합니다.
-$.statebus.store('Counter', ['HasHistory'], {
+var Counter = $.statebus.store('Counter', [HasHistory], {
   state: {
     value: 1
   },
   action: {
     increment: function(amount){
-      this.action.add(this.state.value) // HasHistory의 메소드를 사용할 수 있습니다.
+      this.action.pushHistory(this.state.value) // HasHistory의 메소드를 사용할 수 있습니다.
       return {value: this.state.value + amount}
     }
   }
 })
 
-var counterStore = $.statebus.createStore('Counter', 'app/counter')
-counterStore.action.increment(10)
+var counter = new Counter('app/counter')
+counter.action.increment(5)
 
-console.log(counterStore.state.value) // 10
-console.log(counterStore.state.history) // [1]
+console.log(counter.state.value) // 6
+console.log(counter.state.history) // [1]
 ```
-믹스인은 기존에 정의된 상태, 함수를 하나로 합칩니다. 믹스인을 활용하면 반복적으로 사용되는 스토어의 상태와 액션 정의를 줄일 수 있습니다.
+믹스인은 기존에 정의된 상태(state)와 함수를 하나로 합칩니다. 믹스인을 활용하면 반복적인 스토어 정의를 줄일 수 있습니다.
+
 
 ## License
 MIT
