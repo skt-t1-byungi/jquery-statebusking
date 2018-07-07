@@ -94,10 +94,10 @@ var Store = $.statebus.store('Store', {
   }
 })
 
-// 두번째 인자가 init함수가 받는 매개변수입니다.
+// 두번째 인자로 init함수가 받는 매개변수를 넘겨줄 수 있습니다.
 var store = new Store('app/store', { value: true }) 
 ```
-`init()` 함수를 정의하면 스토어 생성시, 동적인 초기화 작업을 할 수 있습니다. state를 동적으로 정의할 때 유용합니다.
+`init()` 함수를 정의하면 스토어 생성시 초기화 작업을 할 수 있습니다. state를 동적으로 정의할 때 유용합니다.
 
 #### Name System
 ```js
@@ -106,7 +106,7 @@ $.statebus.store('Counter', ['HasHistory'], { ... })
 $.statebus.createStore('Counter', 'app/counter')
 $.statebus.remove('app/counter') // 스토어 제거
 ```
-jquery-statebusking은 jquery를 사용한 레거시 코드를 개선하기 위한 목적으로 만들어 졌습니다. 이러한 환경에서는 제대로 된 모듈시스템을 기대하기 어려울 때가 많습니다. 이 같은 이유로 jquery-statebusking은 스토어 정의하거나 생성할 때 "이름(Name)"을 요구하고 이름을 기반으로 하는 시스템을 사용합니다.
+jquery-statebusking은 jquery를 사용한 레거시 코드를 개선하기 위한 목적으로 만들어 졌습니다. 이러한 환경에서는 제대로 된 모듈시스템을 기대하기 어려울 때가 많습니다. 위 이유로 jquery-statebusking은 스토어 정의하거나 생성할 때 "이름(Name)"을 요구하고 이를 기반으로 하는 시스템을 사용합니다.
 
 #### Remove
 ```js
@@ -121,22 +121,27 @@ $.statebus.remove('app/counter')
 var CounterView = $.statebus.view('CounterView', {
   // "el" 속성으로 DOM 엘리먼트 요소를 선택할 수 있습니다.
   el: '#counter',
+
   // "events" 속성을 사용해서 엘리먼트 내부에서 발생하는 이벤트를 수신하는 메소드를 지정할 수 있습니다.
   // ex) "[이벤트명]": "[메소드명]" 또는 "[이벤트명] [하위타겟]": "[메소드명]"
   events: {
     'click button.increment': 'handleIncrement'
   },
+
   // init함수를 정의하면, 뷰 생성시 자동실행됩니다.
-  init: function(counter){
+  init: function(options){
     // "counter"는 스토어 객체입니다.
-    this.counter = counter 
+    var counter = this.counter = options.counter 
 
     // listenTo 메소드를 이용해 스토어의 액션이벤트를 청취할 수 있습니다.
     // [스토어], [액션명], [실행할 리스너] 순서로 인자를 받습니다.
+    // 액션이름 대신 "all"을 사용하면 모든 액션이벤트를 청취할 수 있습니다.
     this.listenTo(counter, 'all', this.render) 
   },
   render: function() {
     var value = this.counter.state.value
+
+    // 뷰가 생성되면 자동으로 el 속성으로 선택된 DOM 엘리먼트를 jquery로 래핑하여 "this.$el"에 할당합니다.
     this.$el.find('span.value').text(value)
   },
   handleIncrement: function(event) {
@@ -145,7 +150,11 @@ var CounterView = $.statebus.view('CounterView', {
 })
 
 // 뷰를 생성합니다.
-var counterView = new CounterView(counterStore)
+var counterView = new CounterView({
+  counter: counterStore,
+  // 뷰 생성단계에서 "el"을 선택할 수도 있습니다.
+  el: "#counter"
+})
 ```
 
 ## License
