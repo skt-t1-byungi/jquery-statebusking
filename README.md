@@ -220,12 +220,12 @@ new TextInputView({
 ##### listenTo(store, actionName, listener [,immediately])
 ```js
 init: function(){
-  this.listenTo(counter, 'increment decrement', this.render)
+  this.listenTo(counter, 'increment decrement', this.render, true)
   // 또는
-  this.listenTo('app/counter', 'increment decrement', this.render)
+  this.listenTo('app/counter', 'increment decrement', this.render, true)
 }
 ```
-스토어의 액션 이벤트를 청취합니다. 3번째 인자에 true를 주면 리스너 함수를 1회 즉시 실행합니다.
+스토어의 액션 이벤트를 청취합니다. 4번째 인자에 true를 주면 리스너 함수를 1회 즉시 실행합니다.
 
 ```js
 init: function() {
