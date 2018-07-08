@@ -48,7 +48,7 @@
     "eslint": "^4.19.1",
     "eslint-config-byungi": "^0.0.16",
     "jquery": "^3.3.1",
-    "jquery-statebus": "^0.4.3",
+    "jquery-statebus": "^0.4.4",
     "uglify-js": "^3.4.2"
   },
   "ava": {
