@@ -146,7 +146,7 @@
   }
 
   function initBus (bus, opts) {
-    if (typeof bus.state === 'function') bus.state = bus.state(opts)
+    // if (typeof bus.state === 'function') bus.state = bus.state(opts)
     if (bus.init) bus.init(opts)
     return bus
   }

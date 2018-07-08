@@ -84,7 +84,7 @@ var Store = $.statebus.store('Store', {
   }
 })
 
-// 두번째 인자로 init함수가 받는 매개변수를 넘겨줄 수 있습니다.
+// init함수가 받는 매개변수를 두번째 인자를 통해 넘겨줄 수 있습니다.
 var store = new Store('app/store', { value: true }) 
 ```
 `init()` 함수를 정의하면 스토어 생성시 초기화 작업을 할 수 있습니다. state를 동적으로 정의할 때 유용합니다.
@@ -96,7 +96,7 @@ $.statebus.store('Counter', ['HasHistory'], { ... })
 $.statebus.createStore('Counter', 'app/counter')
 $.statebus.remove('app/counter') // 스토어 제거
 ```
-jquery-statebusking은 jquery를 사용한 레거시 코드를 개선하기 위한 목적으로 만들어 졌습니다. 이러한 환경에서는 제대로 된 모듈시스템을 기대하기 어려울 때가 많습니다. 위 이유로 jquery-statebusking은 스토어 정의하거나 생성할 때 "이름(Name)"을 요구하고 이를 기반으로 하는 시스템을 사용합니다.
+jquery-statebusking은 jquery를 사용한 레거시 코드를 개선하기 위한 목적으로 만들어졌습니다. 이러한 환경에서는 제대로 된 모듈시스템을 기대하기 어려울 때가 많습니다. 따라서 jquery-statebusking은 스토어 정의하거나 생성할 때 "이름(Name)"을 요구하고 이를 기반으로 하는 시스템을 사용합니다.
 
 #### Remove
 ```js
@@ -146,7 +146,8 @@ var counterView = new CounterView({
   el: "#counter"
 })
 ```
-jquery-statebusking의 뷰(View)은 백본(Backbone)과 유사합니다. "el" 속성으로 DOM 엘리먼트를 선택하고 "events" 속성으로 리스너를 매핑하며 "listenTo" 메소드로 스토어 액션을 청취합니다. 그러나 유의미한 차이 역시 존재합니다.
+"el" 속성으로 DOM 엘리먼트를 선택하고 "events" 속성으로 리스너를 매핑하며, "listenTo" 메소드로 스토어 액션을 청취합니다. 
+백본(Backbone)과 유사합니다. 그러나 의미있는 차이 역시 존재합니다.
 
 #### Stateful
 ```js
@@ -163,15 +164,116 @@ var CounterView = $.statebus.view('CounterView', {
   init: function() {
     // 자신의 액션 이벤트를 스스로 청취할 수 있습니다.
     this.on('all', $.proxy(this.render, this))
-    // 주의) dispatch와 달리 on메소드는 뷰 외부에서 사용하는 경우를 고려해 리스너에 대한 this bind를 제공하고 있지 않습니다.
-    // 뷰 내부에서 on메소드를 사용할 때는 직접 bind 메소드 또는 $.proxy를 사용해 this를 바인드하세요.
   },
   render: function() {
-    this.$('span').text(this.state.value)
+    this.$('span').text(this.state.value) // this.$el.find 대신 this.$을 사용할 수 있습니다.
   }
 })
 ```
 백본과 가장 큰 차이는 뷰 스스로 스토어에 의존하지 않고 내부 상태를 정의할 수 있는 것입니다. 
+
+#### Mixin
+```js
+$.statebus.view('MainView', ['View1', 'View2'], { ... })
+```
+뷰도 스토어처럼 믹스인이 가능합니다.
+
+#### Create Element
+```js
+var View = $.statebus.view('View', { tagName: 'div' })
+var view = new View();
+view.$el.appendTo('body')  
+```
+el을 지정하지 않으면 tagName 속성의 엘리먼트를 생성합니다. 
+동적으로 생성된 엘리먼트는 직접 body에 주입해야 합니다.
+
+#### Options
+##### el
+뷰의 엘리먼트 요소를 지정합니다. jquery를 이용해서 `$(options.el)` 같이 동작합니다.
+뷰 정의단계에서 선언할 수도 있습니다.
+
+##### tagName
+el이 없을 때, 동적으로 생성할 엘리먼트 태그를 지정합니다. 기본값은 "div"입니다.
+뷰 정의단계에서 선언할 수도 있습니다.
+
+##### events
+엘리먼트 내부에서 발생하는 이벤트를 수신하는 메소드를 지정할 수 있습니다.
+뷰 정의단계에서 선언할 수도 있습니다.
+
+##### attrs
+```js
+new TextInputView({
+  tagName: 'input',
+  attrs: { 
+    'type': 'text',  
+    'placeholder' : 'hello'
+  }
+})
+```
+엘리먼트 속성을 지정합니다.
+뷰 정의단계에서 선언할 수도 있습니다.
+
+#### API
+##### $(selector)
+뷰 엘리먼트의 자식요소를 선택합니다. `this.$el.find()`의 축약 함수입니다.
+
+##### listenTo(store, actionName, listener [,immediately])
+```js
+init: function(){
+  this.listenTo(counter, 'increment decrement', this.render)
+  // 또는
+  this.listenTo('app/counter', 'increment decrement', this.render)
+}
+```
+스토어의 액션 이벤트를 청취합니다. 3번째 인자에 true를 주면 리스너 함수를 1회 즉시 실행합니다.
+
+```js
+init: function() {
+  this.unsubscribe = this.listenTo('app/counter', 'increment decrement', this.render)
+},
+handleClick: function() {
+  // 액션 이벤트 구독을 취소합니다.
+  this.unsubscribe()
+}
+```
+listenTo 메소드는 구독을 취소할 수 있는 함수를 반환합니다. 원하는 시점에 이벤트 구독을 취소할 수 있습니다.
+
+##### on(actionName, listener [,immediately])
+```js
+action: {
+  increment: function() { ... },
+  decrement: function() { ... }
+}
+init: function(){
+  this.unsubscribe = this.on('increment decrement', $.proxy(this.render, this))
+}
+```
+뷰 액션 이벤트를 구독할 수 있습니다. listenTo 메소드와 마찬가지로 구독을 취소할 수 있는 함수를 반환받습니다.
+on메소드는 뷰 외부에서 사용하는 경우를 고려해서 listenTo와 달리 this를 자동으로 바인드(bind)하지 않습니다.
+뷰 내부에서 on메소드를 사용할 때는 직접 $.proxy(또는 ES5 bind 함수)로 this를 바인드하세요.
+
+##### getState(store, key [,default])
+```js
+var articleTitle = this.getState('app/articles', 'articles.0.title')
+```
+스토어의 값을 가져오기 위한, `$.statebus.state[스토어이름][속성명]`의 축약 함수입니다. 
+점 표기법을 사용해서 깊숙한(nested) 곳에 위치한 값을 쉽게 가져올 수 있습니다.
+
+##### getPrevState(store, key [,default])
+바뀌기 전 스토어 상태를 가져옵니다. 점 표기법을 지원합니다.
+
+##### dispatch(actionName, ...args)
+```js
+this.dispatch('onPostWrite', post)
+```
+`listenTo()`로 구독 중인 스토어에 지정한 액션을 일괄 실행합니다. 
+스토어의 액션을 리액티브한 형태로 디자인 했을 때 유용합니다.
+
+##### dispatchAll(actionName, ...args)
+존재하는 모든 스토어에 지정한 액션을 일괄 실행합니다. 
+
+##### remove()
+뷰 엘리먼트를 제거합니다. 스토어에 대한 모든 구독 역시 취소합니다.
 
 ## Why?
 jquery-statebus는 뷰와 상태를 분리하는 아주 간단한 패턴을 제공하지만, 반복되는 상태, 뷰를 처리하기 위한 편의는 제공하지 않습니다. jquery-statebusking는 이 점을 보완합니다.

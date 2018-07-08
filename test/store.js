@@ -70,7 +70,8 @@ test('initialize with option', t => {
   })('test', {test: 'test'})
 })
 
-test('dynamic state', t => {
+// 보류
+test.skip('dynamic state', t => {
   $$.store('test', {
     state ({val}) {
       return {a: val}
