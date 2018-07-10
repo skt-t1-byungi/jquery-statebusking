@@ -6,7 +6,7 @@ jquery-statetbusking은 jquery-statebus를 백본(backbone)처럼 만듭니다. 
 
 ## Install
 ```html
-<script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js">
+<script src="https//code.jquery.com/jquery.min.js">
 <script src="https://unpkg.com/jquery-statebus">
 <script src="https://unpkg.com/jquery-statebusking">
 ```
