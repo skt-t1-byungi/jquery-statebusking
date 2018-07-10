@@ -1,13 +1,70 @@
 # jquery-statetbusking
 🎸Backbone alternative using jquery-statebus
 
-## What?
+## What
 jquery-statetbusking은 jquery-statebus를 백본(backbone)처럼 만듭니다. 스토어, 뷰를 정의합니다. 정의된 스토어, 뷰는 반복해서 재사용 할 수 있습니다.
+
+## Install
+```html
+<script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js">
+<script src="https://unpkg.com/jquery-statebus">
+<script src="https://unpkg.com/jquery-statebusking">
+```
+
+## Exmaple
+```js
+var CounterStore = $.statebus.store('CounterStore', {
+  state: {
+    value: 1
+  },
+
+  action: {
+    increment: function() {
+      return {value: this.state.value + 1}
+    },
+
+    decrement: function() {
+      return {value: this.state.value - 1}
+    }
+  }
+})
+
+var CounterView = $.statebus.view('CounterView', {
+  events: {
+    'click button.increment': 'handleIncrement',
+    'click button.decrement': 'handleDecrement'
+  },
+
+  init: function(options) {
+    var counter = this.counter = options.counter
+    this.$value = this.$('span.value')
+
+    this.listenTo(counter, 'all', this.render, true)
+  },
+
+  render: function() {
+    var value = this.counter.state.value
+    this.$display.text(value)
+  },
+
+  handleIncrement: function() {
+    this.counter.action.increment()
+  },
+
+  handleDecrement: function() {
+    this.counter.action.increment()
+  }
+})
+
+new CounterView({ el: '#counter', counter: new CounterStore('app/counter') })
+```
 
 ## Overview
 ### Store
+스토어는 뷰와 분리되서 앱 상태와 로직을 관리합니다. 백본의 콜렉션, 모델과 비슷합니다.
+
+#### Definition
 ```js
-// 스토어를 정의합니다.
 var Counter = $.statebus.store('Counter', {
   state: {
     value: 1
@@ -20,25 +77,59 @@ var Counter = $.statebus.store('Counter', {
       return {value: this.state.value - 1}
     }
   },
-  log: function() {
-    console.log('current: ' + this.state.value)
+})
+```
+액션 메소드의 반환결과가 기존 상태와 병합해 새로운 상태를 맏듭니다.
+
+#### Create
+스토어를 생성하는 방법은 2가지입니다.
+```js
+var counterStore = new Counter('app/counter')
+// 또는
+var counterStore = $.statebus.createStore('Counter', 'app/counter')
+```
+스토어 생성시, `이름`을 인자로 받습니다. 이름을 요구하는 이유는 아래 "Name System"에서 설명합니다.
+
+#### Event
+`store.on()` 메소드로 액션 이벤트를 청취할 수 있습니다.
+```js
+counter.on('increment', function (){ 
+  console.log('incremented!!')
+ })
+
+counter.on('decrement', function (){ 
+  console.log('decremented!!')
+ })
+
+counter.action.increment()
+// => incremented!
+```
+
+"all" 이벤트로 모든 액션 이벤트를 청취할 수 있습니다.
+```js
+counter.on('all', function (){ ... }) 
+```
+
+#### Method
+state, action 외 다른 메소드를 정의해서 사용할 수 있습니다.
+
+```js
+$.statebus.store('Counter', {
+  ...
+  format: function(){
+    return '총 ' + this.state.value + '회'
   }
 })
 
-// 정의한 스토어를 생성합니다.
-var counter = new Counter('app/counter')
-
-// 스토어에서 트리거되는 액션 이벤트를 청취합니다.
-counter.on('increment', function (){ ... })
-counter.on('decrement', function (){ ... })
-counter.on('all', function (){ ... }) // 모든 액션 이벤트를 청취합니다.
-
-// 다른 메소드를 호출 할 수도 있습니다.
-counter.log() // current: 1
+...
+var formatted = counter.format()
+console.log(formatted)
+// => 총 1회
 ```
-statebusking의 스토어(store)는 정적입니다. 백본의 모델처럼 동적으로 스토어를 생성, 제거를 할 수도 있지만 추천하지 않습니다. 스토어 대신 state에 값을 동적으로 추가하거나 제거하세요.
 
 #### Mixin
+믹스인은 여러 스토어 정의를 하나로 합칩니다. 믹스인을 활용하면 반복적인 스토어 정의를 줄일 수 있습니다.
+
 ```js
 var HasHistory = $.statebus.store('HasHistory', {
   state: {
@@ -70,7 +161,6 @@ counter.action.increment(5)
 console.log(counter.state.value) // 6
 console.log(counter.state.history) // [1]
 ```
-믹스인은 기존에 정의된 상태(state)와 함수를 하나로 합칩니다. 믹스인을 활용하면 반복적인 스토어 정의를 줄일 수 있습니다.
 
 #### Initialize
 ```js
