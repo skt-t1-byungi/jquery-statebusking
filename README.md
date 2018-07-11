@@ -1,9 +1,9 @@
-# jquery-statetbusking
+# jquery-statebusking
 > 🎸Backbone alternative using jquery-statebus
 
 [![npm](https://img.shields.io/npm/v/jquery-statebusking.svg?style=flat-square)](https://www.npmjs.com/package/jquery-statebusking)
 
-jquery-statetbusking은 jquery-statebus를 백본(backbone)처럼 만듭니다. 스토어, 뷰를 정의합니다. 정의된 스토어, 뷰는 반복해서 재사용 할 수 있습니다.
+jquery-statebusking은 jquery-statebus를 백본(backbone)처럼 만듭니다. 스토어, 뷰를 정의합니다. 정의된 스토어, 뷰는 반복해서 재사용 할 수 있습니다.
 
 ## Why?
 jquery-statebus는 뷰와 상태를 분리하는 아주 간단한 패턴을 제공하지만, 반복되는 상태, 뷰를 처리하기 위한 편의는 제공하지 않습니다. jquery-statebusking는 이 점을 보완합니다.
