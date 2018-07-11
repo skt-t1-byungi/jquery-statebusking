@@ -1,6 +1,8 @@
 # jquery-statetbusking
 > 🎸Backbone alternative using jquery-statebus
 
+[![npm](https://img.shields.io/npm/v/jquery-statebusking.svg?style=flat-square)](https://www.npmjs.com/package/jquery-statebusking)
+
 jquery-statetbusking은 jquery-statebus를 백본(backbone)처럼 만듭니다. 스토어, 뷰를 정의합니다. 정의된 스토어, 뷰는 반복해서 재사용 할 수 있습니다.
 
 ## Why?
@@ -73,11 +75,10 @@ var CounterView = $.statebus.view('CounterView', {
 new CounterView({ el: '#counter', counter: new Counter('app/counter') })
 ```
 
-## Overview
-### Store
+## Store
 스토어는 뷰와 분리되서 앱 상태와 로직을 관리합니다. 백본의 콜렉션, 모델과 비슷합니다.
 
-#### Definition
+### Definition
 스토어를 정의합니다.
 ```js
 var Counter = $.statebus.store('Counter', {
@@ -98,7 +99,7 @@ var Counter = $.statebus.store('Counter', {
 ```
 액션 메소드의 반환결과가 기존 상태와 병합되어 새로운 상태를 만듭니다.
 
-#### Create
+### Create
 정의한 스토어를 생성하는 방법은 2가지입니다.
 ```js
 var counter = new Counter('app/counter')
@@ -107,7 +108,7 @@ var counter = $.statebus.createStore('Counter', 'app/counter')
 ```
 스토어 생성시, `이름`을 인자로 받습니다. 이름을 요구하는 이유는 아래 [Name System](#name-system)에서 설명합니다.
 
-#### Event
+### Event
 `store.on()` 메소드로 액션 이벤트를 청취할 수 있습니다.
 ```js
 counter.on('increment', function (){ 
@@ -123,7 +124,7 @@ counter.action.increment()
 counter.on('all', function (){ ... }) 
 ```
 
-#### Method
+### Method
 state, action외 다른 메소드를 정의해서 사용할 수 있습니다.
 ```js
 $.statebus.store('Counter', {
@@ -139,7 +140,7 @@ console.log(formatted)
 // => 총 1회
 ```
 
-#### Mixin
+### Mixin
 믹스인은 여러 스토어 정의를 하나로 합칩니다. 
 믹스인을 활용하면 반복적인 스토어 정의를 줄일 수 있습니다.
 
@@ -188,7 +189,7 @@ $.statebus.store('A', [B, C, D], { ... })
 $.statebus.store('A', ['B', 'C', 'D'], { ... })
 ```
 
-#### Initialize
+### Initialize
 `store.init()`을 정의하면 생성시 초기화 작업을 할 수 있습니다.
 ```js
 var Store = $.statebus.store('Store', {
@@ -206,7 +207,7 @@ var store = new Store('app/store', { value: true })
 ```
 상태를 동적으로 정의할 때 유용합니다.
 
-#### <span id="name-system">Name System</span>
+### <span id="name-system">Name System</span>
 statebusking은 jquery를 사용한 레거시 코드를 개선하기 위한 목적으로 만들어졌습니다. 이러한 환경에서는 제대로 된 모듈시스템을 기대하기 어려울 때가 많습니다.
 스토어 정의하거나 생성할 때 `이름(name)`을 요구합니다. `이름(name)`으로 의존성을 해결하면 모듈시스템이 없을 때 유용합니다.
 ```js
@@ -216,7 +217,7 @@ $.statebus.createStore('Counter', 'app/counter') // 스토어 생성
 $.statebus.remove('app/counter') // 스토어 제거
 ```
 
-#### Remove
+### Remove
 스토어를 제거합니다.
 ```js
 new Model('app/model')
@@ -225,12 +226,12 @@ $.statebus.remove('app/model')
 
 > statebusking의 스토어(store)는 정적입니다.
 
-지금처럼 백본의 모델처럼 동적으로 제거를 할 수도 있지만 추천하지 않습니다. 되도록 스토어를 직접 제거하는 대신, 동적인 상태를 정의하고 액션 메소드로 상태 값을 제거하세요.
+백본의 모델처럼 동적으로 제거를 할 수도 있지만 추천하지 않습니다. 되도록 스토어를 직접 제거하는 대신, 동적인 상태를 정의하고 액션 메소드로 상태 값을 제거하세요.
 
-### View
+## View
 뷰는 상태를 담당하는 스토어와 분리되어 DOM 변화를 관리합니다.
 
-#### Definition
+### Definition
 뷰를 정의합니다.
 ```js
 var CounterView = $.statebus.view('CounterView', { 
@@ -240,7 +241,7 @@ var CounterView = $.statebus.view('CounterView', {
 ```
 스토어처럼 `view.init()`을 정의하면 생성시 초기화 작업을 할 수 있습니다.
 
-#### Create
+### Create
 정의한 뷰를 생성하는 방법 역시 2가지입니다. 뷰 생성시 옵션객체를 인자로 넘겨줄 수 있습니다.
 ```js
 var view = new CounterView({el: '#counter'})
@@ -262,13 +263,13 @@ $.statebus.view('CounterView', {
 })
 ```
 
-#### Mixin
+### Mixin
 뷰 역시 스토어처럼 믹스인이 가능합니다.
 ```js
 $.statebus.view('A', ['B', 'C'], { ... })
 ```
 
-#### Event delegate
+### Event delegate
 `events` 속성으로 view.$el에서 발생하는 이벤트와 핸들러 메소드를 매핑할 수 있습니다.
 ```js
 $.statebus.view('View', {
@@ -301,7 +302,7 @@ $.statebus.view('CounterView', {
 따라서 this가 바인딩 되지 않은 함수를 매핑하면 잘못된 동작이 발생될 수 있습니다. 
 다행히 스토어 액션 메소드들은 this 바인딩이 미리 되어 있어서 안전합니다.
 
-#### Stateful
+### Stateful
 statebusking은 백본과 달리, `뷰 상태`란 개념이 존재합니다.
 ```js
 $.statebus.view('CounterView', {
@@ -322,7 +323,7 @@ $.statebus.view('CounterView', {
 ```
 이것은 `앱 상태`와 `뷰 상태`의 경계를 명확하게 해서 상태관리에 도움을 줍니다.
 
-#### Options
+### Options
 뷰를 생성시, 아래 옵션객체 속성을 참조합니다.
 
 - `el` - 뷰 엘리먼트 요소(view.$el)를 선택합니다.
@@ -332,7 +333,7 @@ $.statebus.view('CounterView', {
 
 옵션의 속성들은 정의단계에서 미리 선언할 수 있습니다.
 
-#### view.listenTo(store, actionName, listener [,immediately])
+### view.listenTo(store, actionName, listener [,immediately])
 스토어의 액션 이벤트를 구독합니다.
 
 - `store` *Store|string* - 대상 스토어. `이름`(string)으로 스토어를 지정할 수 있습니다.
@@ -364,11 +365,11 @@ $.statebus.view('CounterView', {
   ...
 ```
 
-#### view.on(actionName, listener [,immediately])
+### view.on(actionName, listener [,immediately])
 뷰의 액션 이벤트를 구독합니다.
 
 - `actionName` *string|string[]* - 구독할 액션이벤트입니다.
-- `listener` *(this:View, store, context) => void* - 액션이 발생했을 때 실행될 리스너 함수입니다.
+- `listener` *(this:View, view, context) => void* - 액션이 발생했을 때 실행될 리스너 함수입니다.
 - `immediately` *boolean* - 즉시 실행여부입니다. 기본값은 false입니다.
 
 `view.listenTo()`와 마찬가지로 구독을 취소할 수 있는 함수를 반환받습니다
@@ -385,10 +386,10 @@ $.statebus.view('CounterView', {
 ```
 단 `view.listenTo()`와 달리 `view.on()`은 *뷰 외부에서 사용하는 경우를 고려해서* this를 자동바인드하지 않습니다. $.proxy, 또는 ES5 bind 함수로 this를 바인드하세요.
 
-#### view.$(selector)
+### view.$(selector)
 뷰 엘리먼트의 자식요소를 선택합니다. `view.$el.find()`의 축약 함수입니다.
  
-#### view.getState(store, key [,default])
+### view.getState(store, key [,default])
 스토어 상태를 얻습니다.
 
 - `store` *Store|string* - 대상 스토어. `이름`(string)으로 스토어를 지정할 수 있습니다.
@@ -402,10 +403,10 @@ $.statebus.view('CounterView', {
   }
 ```
 
-#### view.getPrevState(store, key [,default])
+### view.getPrevState(store, key [,default])
 스토어의 변경 직전의 상태를 얻습니다.
 
-#### view.dispatch(actionName, ...args)
+### view.dispatch(actionName, ...args)
 `view.listenTo()`로 구독 중인 스토어에 지정한 액션을 일괄 실행합니다. 
 ```js
 $.statebus.store('Post', {
@@ -419,19 +420,25 @@ $.statebus.store('Post', {
 
 $.statebus.view('PostView', {
   ...,
+  init: function() {
+    this.listenTo('app/post', 'all', this.render)
+  }
+
   onSubmit: function(){
     var post = this.$textarea.val()
     this.dispatch('onPostWrite', post)
-  }
-})s
+  },
+  ...
+})
 ```
 스토어의 액션을 *리액티브*한 형태로 디자인 했을 때 유용합니다.
 
-#### view.dispatchAll(actionName, ...args)
+### view.dispatchAll(actionName, ...args)
 생성된 모든 스토어에 지정한 액션을 일괄 실행합니다. 
 
-#### view.remove()
-뷰 엘리먼트를 제거합니다. 스토어에 대한 모든 구독 역시 취소합니다. <br>
+### view.remove()
+뷰 엘리먼트를 제거합니다. 스토어에 대한 모든 구독 역시 취소합니다. 
+
 백본과 달리 삭제(remove)이벤트를 제공하지 않습니다. 
 *statebusking은 뷰의 제거를 상위요소가 결정한다*란 원칙을 갖고 있습니다.
 
