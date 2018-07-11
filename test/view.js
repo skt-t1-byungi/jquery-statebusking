@@ -29,6 +29,7 @@ test('delegate events by events prop', t => {
   body.innerHTML = `
   <div id="app">
     <button data-inc>+</button>
+    <button data-dec>+</button>
   </div>
   `
   const view = $$.createView('counter', {el: '#app'})
@@ -36,6 +37,8 @@ test('delegate events by events prop', t => {
   t.is(view.state.val, 0)
   doc.querySelector('#app [data-inc]').click()
   t.is(view.state.val, 1)
+  doc.querySelector('#app [data-dec]').click() // dot notation
+  t.is(view.state.val, 0)
 })
 
 test('set attributes by attrs prop', t => {

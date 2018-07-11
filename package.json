@@ -39,8 +39,7 @@
     }
   },
   "eslintIgnore": [
-    "jquery-statebusking.min.js",
-    "test/*"
+    "jquery-statebusking.min.js"
   ],
   "devDependencies": {
     "ava": "^0.25.0",

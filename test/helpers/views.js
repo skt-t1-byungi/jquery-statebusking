@@ -7,10 +7,14 @@ $$.view('counter', {
   action: {
     inc () {
       return {val: this.state.val + 1}
+    },
+    dec () {
+      return {val: this.state.val - 1}
     }
   },
   events: {
-    'click [data-inc]': 'handleInc'
+    'click [data-inc]': 'handleInc',
+    'click [data-dec]': 'action.dec' // dot notation
   },
   handleInc: function () {
     this.action.inc()

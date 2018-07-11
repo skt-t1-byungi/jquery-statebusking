@@ -133,7 +133,7 @@
     if (events) {
       var splitter = /^(\S+)\s*(.*)$/
       $.each(events, function (key, handler) {
-        if (typeof handler === 'string') handler = view[handler]
+        if (typeof handler === 'string') handler = objectGet(view, handler, $.noop)
         var match = key.match(splitter)
         $el.on(match[1], match[2], $.proxy(handler, view))
       })
@@ -183,8 +183,8 @@
   }
 
   function resolveProp (view, prop, opts) {
-    return typeof view[prop] === 'function' ? view[prop](opts)
-      : opts.hasOwnProperty(prop) ? opts[prop]
+    return opts.hasOwnProperty(prop) ? opts[prop]
+      : typeof view[prop] === 'function' ? view[prop](opts)
         : view[prop]
   }
 
