@@ -364,7 +364,7 @@ $.statebus.view('CounterView', {
   ...
 ```
 
-##### view.on(actionName, listener [,immediately])
+#### view.on(actionName, listener [,immediately])
 뷰의 액션 이벤트를 구독합니다.
 
 - `actionName` *string|string[]* - 구독할 액션이벤트입니다.
