@@ -15,7 +15,7 @@ jquery-statebus는 뷰와 상태를 분리하는 아주 간단한 패턴을 제�
 
 ## Install
 ```html
-<script src="https//code.jquery.com/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery.min.js"></script>
 <script src="https://unpkg.com/jquery-statebus"></script>
 <script src="https://unpkg.com/jquery-statebusking"></script>
 ```
@@ -106,7 +106,7 @@ var counter = new Counter('app/counter')
 // 또는
 var counter = $.statebus.createStore('Counter', 'app/counter')
 ```
-스토어 생성시, `이름`을 인자로 받습니다. 이름을 요구하는 이유는 아래 [Name System](#name-system)에서 설명합니다.
+스토어 생성시, `이름`이 필요합니다. 이름이 필요한 이유는 아래 [Name System](#name-system)에서 설명합니다.
 
 ### Event
 `store.on()` 메소드로 액션 이벤트를 청취할 수 있습니다.
@@ -182,7 +182,7 @@ b.print()
 // => foo-BAR
 ```
 
-배열을 사용하면 여러 스토어 정의를 믹스인 할 수 있습니다.
+배열로 여러 스토어 정의를 믹스인 할 수 있습니다.
 ```js
 $.statebus.store('A', [B, C, D], { ... })
 // 또는
@@ -208,8 +208,8 @@ var store = new Store('app/store', { value: true })
 상태를 동적으로 정의할 때 유용합니다.
 
 ### <span id="name-system">Name System</span>
-statebusking은 jquery를 사용한 레거시 코드를 개선하기 위한 목적으로 만들어졌습니다. 이러한 환경에서는 제대로 된 모듈시스템을 기대하기 어려울 때가 많습니다.
-스토어 정의하거나 생성할 때 `이름(name)`을 요구합니다. `이름(name)`으로 의존성을 해결하면 모듈시스템이 없을 때 유용합니다.
+statebusking은 jquery를 사용한 레거시 코드를 개선하기 위해 만들어졌습니다. 이러한 환경에서는 제대로 된 모듈시스템을 기대하기 어려울 때가 많습니다.
+스토어 정의하거나 생성할 때 `이름(name)`을 지정하여 의존성을 해결하면 모듈시스템이 없을 때 유용합니다.
 ```js
 $.statebus.store('Counter', { ... }) // 스토어 정의
 $.statebus.store('A', ['B', 'C'], { ... }) // 스토어 믹스인
@@ -263,6 +263,13 @@ $.statebus.view('CounterView', {
 })
 ```
 
+만약 지정한 `el`이 없다면 `tagName`의 엘리먼트를 만듭니다. 이 땐 직접 문서에 삽입해야 합니다.
+```js
+var view = new CounterView({tagName: 'div'})
+view.$el.appendTo('body')
+```
+`tagName`의 기본값은 "div"입니다.
+
 ### Mixin
 뷰 역시 스토어처럼 믹스인이 가능합니다.
 ```js
@@ -298,9 +305,9 @@ $.statebus.view('CounterView', {
   }
 })
 ```
-이 때 핸들러의 this를 뷰 객체로 자동 바인딩합니다. 
-따라서 this가 바인딩 되지 않은 함수를 매핑하면 잘못된 동작이 발생될 수 있습니다. 
-다행히 스토어 액션 메소드들은 this 바인딩이 미리 되어 있어서 안전합니다.
+핸들러메소드 this를 뷰 객체로 자동바인딩합니다. 
+따라서 메소드 this가 고정 되지 않은 경우, 의도하지 않은 동작이 발생할 수 있습니다. 
+다행히 스토어 액션 메소드들은 this 바인딩이 미리 되어 있어 안전합니다.
 
 ### Stateful
 statebusking은 백본과 달리, `뷰 상태`란 개념이 존재합니다.
@@ -358,7 +365,7 @@ $.statebus.view('CounterView', {
     this.unsubscribe = this.listenTo('app/counter', 'increment decrement', this.render)
   },
 
-  handleClick: function() {
+  onClick: function() {
     // 액션 이벤트 구독을 취소합니다.
     this.unsubscribe()
   },
@@ -369,7 +376,7 @@ $.statebus.view('CounterView', {
 뷰의 액션 이벤트를 구독합니다.
 
 - `actionName` *string|string[]* - 구독할 액션이벤트입니다.
-- `listener` *(this:View, view, context) => void* - 액션이 발생했을 때 실행될 리스너 함수입니다.
+- `listener` *(view, context) => void* - 액션이 발생했을 때 실행될 리스너 함수입니다.
 - `immediately` *boolean* - 즉시 실행여부입니다. 기본값은 false입니다.
 
 `view.listenTo()`와 마찬가지로 구독을 취소할 수 있는 함수를 반환받습니다
@@ -389,12 +396,12 @@ $.statebus.view('CounterView', {
 ### view.$(selector)
 뷰 엘리먼트의 자식요소를 선택합니다. `view.$el.find()`의 축약 함수입니다.
  
-### view.getState(store, key [,default])
+### view.getState(store, key [,defaults])
 스토어 상태를 얻습니다.
 
 - `store` *Store|string* - 대상 스토어. `이름`(string)으로 스토어를 지정할 수 있습니다.
-- `key` *string* - 속성명. 점 표기법을 사용해서 깊숙한(nested) 곳에 위치한 값을 가져올 수 있습니다.
-- `default` *undefined* - 값이 존재하지 않을 때 반환할 기본값.
+- `key` *string* - 속성명. 점 표기법을 사용해서 깊은(nested) 곳에 위치한 값을 가져올 수 있습니다.
+- `defaults` *undefined* - 값이 존재하지 않을 때 반환할 기본값.
 
 ```js
   ...,
@@ -439,8 +446,14 @@ $.statebus.view('PostView', {
 ### view.remove()
 뷰 엘리먼트를 제거합니다. 스토어에 대한 모든 구독 역시 취소합니다. 
 
-백본과 달리 삭제(remove)이벤트를 제공하지 않습니다. 
-*statebusking은 뷰의 제거를 상위요소가 결정한다*란 원칙을 갖고 있습니다.
+> 백본과 달리 삭제(remove)이벤트를 제공하지 않습니다. 
+
+*statebusking은 뷰제거를 부모요소가 결정한다*란 원칙을 믿습니다.
+뷰와 뷰의 삭제이벤트가 필요하다면 부모 뷰의 액션메소드와 액션이벤트를 사용합니다.
+
+## Example Codes
+- [Counter example](https://jsfiddle.net/ecooz/0cuew1gb/)
+
 
 ## License
 MIT

@@ -29,7 +29,7 @@ test('delegate events by events prop', t => {
   body.innerHTML = `
   <div id="app">
     <button data-inc>+</button>
-    <button data-dec>+</button>
+    <button data-dec>-</button>
   </div>
   `
   const view = $$.createView('counter', {el: '#app'})

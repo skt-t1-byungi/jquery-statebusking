@@ -32,6 +32,9 @@
   },
   "eslintConfig": {
     "extends": "byungi/old",
+    "plugins": [
+      "html"
+    ],
     "globals": {
       "define": true,
       "require": true,
@@ -46,9 +49,14 @@
     "browser-env": "^3.2.5",
     "eslint": "^4.19.1",
     "eslint-config-byungi": "^0.0.16",
+    "eslint-plugin-html": "^4.0.5",
     "jquery": "^3.3.1",
     "jquery-statebus": "^0.4.4",
     "uglify-js": "^3.4.2"
+  },
+  "peerDependencies": {
+    "jquery": "^3.3.1",
+    "jquery-statebus": "^0.4.4"
   },
   "ava": {
     "require": [

@@ -1270,7 +1270,7 @@ eslint-plugin-ava@^4.5.0:
     multimatch "^2.1.0"
     pkg-up "^2.0.0"
 
-eslint-plugin-html@^4.0.3:
+eslint-plugin-html@^4.0.3, eslint-plugin-html@^4.0.5:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/eslint-plugin-html/-/eslint-plugin-html-4.0.5.tgz#e8ec7e16485124460f3bff312016feb0a54d9659"
   dependencies:

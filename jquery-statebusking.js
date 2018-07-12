@@ -114,6 +114,10 @@
   statebus.createView = function (name, opts) {
     opts = opts || {}
 
+    if (!$.isPlainObject(opts)) {
+      throw new TypeError('[statebusking] Expected "options" to be plain object. ("' + typeof opts + '")')
+    }
+
     // create instance
     var namespace = makeViewNS(name)
     var view = statebus(namespace, resolveDef(views, name), true)
