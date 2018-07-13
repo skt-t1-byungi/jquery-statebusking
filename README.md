@@ -453,7 +453,7 @@ $.statebus.view('PostView', {
 
 ## Example Codes
 - [Counter example](https://jsfiddle.net/ecooz/0cuew1gb/)
-
+- [TodoMVC example - with lodash](https://jsfiddle.net/ecooz/h8fx4p9L/)
 
 ## License
 MIT
