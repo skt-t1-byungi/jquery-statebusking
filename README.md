@@ -444,12 +444,16 @@ $.statebus.view('PostView', {
 생성된 모든 스토어에 지정한 액션을 일괄 실행합니다. 
 
 ### view.remove()
-뷰 엘리먼트를 제거합니다. 스토어에 대한 모든 구독 역시 취소합니다. 
+뷰 엘리먼트를 제거합니다. 스토어에 대한 모든 구독 역시 취소합니다. 삭제이벤트를 구독할 수 있습니다. 
 
-> 백본과 달리 삭제(remove)이벤트를 제공하지 않습니다. 
-
-*statebusking은 뷰제거를 부모요소가 결정한다*란 원칙을 믿습니다.
-뷰와 뷰의 삭제이벤트가 필요하다면 부모 뷰의 액션메소드와 액션이벤트를 사용합니다.
+```js
+$.statebus.view('PostView', {
+  ...,
+  init: function() {
+    this.on('remove', $.proxy(this.onRemove))
+  }
+})
+```
 
 ## Example Codes
 - [Counter example](https://jsfiddle.net/ecooz/0cuew1gb/)
