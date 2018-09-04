@@ -387,11 +387,10 @@ $.statebus.view('CounterView', {
   },
 
   init: function(){
-    this.unsubscribe = this.on('increment decrement', $.proxy(this.render, this))
+    this.unsubscribe = this.on('increment decrement', this.render)
   },
   ...
 ```
-단 `view.listenTo()`와 달리 `view.on()`은 *뷰 외부에서 사용하는 경우를 고려해서* this를 자동바인드하지 않습니다. $.proxy, 또는 ES5 bind 함수로 this를 바인드하세요.
 
 ### view.$(selector)
 뷰 엘리먼트의 자식요소를 선택합니다. `view.$el.find()`의 축약 함수입니다.
